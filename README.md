@@ -58,4 +58,4 @@ Logic is that we invoice is sent to desired employee by particular workflow and 
 
 At the end, I really wanted to implement CLI for the project using some cli creating libraries like pinocli or kotlinx. I spent a lot of time configuring it in gradle but could make it (Errors were appearing all the time). Then I just enabled adding the invoice from terminal and hardcoded it a little bit.
 
-This is definitely not the production design of the project and we could add some server frameworks to deal with CRUD requests, but I believe it was out of scope at the moment. Hope you like the idea. 
+This is definitely not the production design of the project and we could add some server frameworks to deal with CRUD requests, but I believe it was out of scope at the moment. I didn't create separate classes to wrap up functions as I was just working with database, but it can be done in the future. Hope you like the idea. 
