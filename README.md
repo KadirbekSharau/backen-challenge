@@ -45,3 +45,17 @@ While designing and implementing the solution the candidate must consider the fo
 ./gradlew clean build
 ./gradlew run
 ```
+# Kadirbek
+## Here's the image of database structure.
+https://drive.google.com/file/d/1UlJhzxZIkdA8mT1xsrJP0aY9RwySPLXm/view?usp=sharing
+
+Overal, it was my first time writing and working on Kotlin language and Java-like code. First, I spent some time learning the syntax and concepts (didn't learn all :)). Then I spent another time to understand the code and how the project is structured (JVM, Gradle). Working with exposed library was difficult:) I got headache with type assertion, transaction access and etc.
+
+After figuring out with the code, I tried to understand the instructions. I didn't fully get the parts with constraints honestly, like relation of invoice to the department and for symplicity thought that whether invoice can be related to particular department of company or not if it is not given. I got the instructions how I understood it in README and build database schema respectively. 
+Logic is that we invoice is sent to desired employee by particular workflow and that employee automatically approves it (we can change that after). We also store all approvals.
+
+80% of time was spent to debug and understand the language and code :)
+
+At the end, I really wanted to implement CLI for the project using some cli creating libraries like pinocli or kotlinx. I spent a lot of time configuring it in gradle but could make it (Errors were appearing all the time). Then I just enabled adding the invoice from terminal and hardcoded it a little bit.
+
+This is definitely not the production design of the project and we could add some server frameworks to deal with CRUD requests, but I believe it was out of scope at the moment. Hope you like the idea. 
