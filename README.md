@@ -49,7 +49,7 @@ While designing and implementing the solution the candidate must consider the fo
 ## Here's the image of database structure.
 https://drive.google.com/file/d/1UlJhzxZIkdA8mT1xsrJP0aY9RwySPLXm/view?usp=sharing
 
-Overal, it was my first time writing and working on Kotlin language and Java-like code. First, I spent some time learning the syntax and concepts (didn't learn all :)). Then I spent another time to understand the code and how the project is structured (JVM, Gradle). Working with exposed library was difficult:) I got headache with type assertion, transaction access and etc.
+Overal, it was my first time writing and working on Kotlin language and Java-like code. First, I spent some time learning the syntax and concepts (didn't learn all :)). Then I spent another time to understand the code and how the project is structured (JVM, Gradle). Initially, I was working in VScode which was really inconvenient to work with Kotlin and today I discovered IntelliJ. Working with exposed library was difficult:) I got headache with type assertion, transaction access and etc.
 
 After figuring out with the code, I tried to understand the instructions. I didn't fully get the parts with constraints honestly, like relation of invoice to the department and for symplicity thought that whether invoice can be related to particular department of company or not if it is not given. I got the instructions how I understood it in README and build database schema respectively. 
 Logic is that we invoice is sent to desired employee by particular workflow and that employee automatically approves it (we can change that after). We also store all approvals.
