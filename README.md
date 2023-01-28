@@ -47,7 +47,7 @@ While designing and implementing the solution the candidate must consider the fo
 ```
 # Kadirbek
 ## Here's the image of database structure.
-https://drive.google.com/file/d/1UlJhzxZIkdA8mT1xsrJP0aY9RwySPLXm/view?usp=sharing
+<img width="1045" alt="Screen Shot 2023-01-28 at 22 48 04" src="https://user-images.githubusercontent.com/64200099/215284575-a96c93b9-7508-43db-879d-b5c2b3adca58.png">
 
 Overal, it was my first time writing and working on Kotlin language and Java-like code. First, I spent some time learning the syntax and concepts (didn't learn all :)). Then I spent another time to understand the code and how the project is structured (JVM, Gradle). Initially, I was working in VScode which was really inconvenient to work with Kotlin and today I discovered IntelliJ. Working with exposed library was difficult:) I got headache with type assertion, transaction access and etc.
 
