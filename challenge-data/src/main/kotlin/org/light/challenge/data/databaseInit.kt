@@ -1,132 +1,64 @@
 package org.light.challenge.data
 
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.math.BigDecimal
 
-import org.light.challenge.data.Company
-import org.light.challenge.data.Department
-import org.light.challenge.data.Employee
-import org.light.challenge.data.Invoice
-import org.light.challenge.data.Rule
-import org.light.challenge.data.Workflow
-import org.light.challenge.data.Approval
-
+/**
+ * Initialize the database with creating tables and adding data migration
+ * @param db the instance of the database to be initialized
+ */
 fun DatabaseInit(db: Database) {
+    // Start transaction
     transaction(db) {
+        // Create all the tables defined in the schema
         SchemaUtils.create(Company, Department, Employee, Invoice, Rule, Workflow, Approval)
-        Company.insert {
-            it[name] = "Light"
-        }
-
-        Department.insert {
-            it[name] = "Finance"
-            it[company_id] = 1
-        }
-        Department.insert {
-            it[name] = "Marketing"
-            it[company_id] = 1
-        }
-
-        Employee.insert {
-            it[name] = "Mark"
-            it[is_manager] = true
-            it[role] = "CFO"
-            it[department_id] = 1
-        }
-        Employee.insert {
-            it[name] = "Bob"
-            it[is_manager] = false
-            it[role] = "Member"
-            it[department_id] = 1
-        }
-        Employee.insert {
-            it[name] = "Steven"
-            it[is_manager] = true
-            it[role] = "CMO"
-            it[department_id] = 2
-        }
-        Employee.insert {
-            it[name] = "John"
-            it[is_manager] = false
-            it[role] = "Member"
-            it[department_id] = 2
-        }
-        Employee.insert {
-            it[name] = "Ray"
-            it[is_manager] = true
-            it[role] = "Manager"
-            it[department_id] = 1
-        }
-
-        Workflow.insert {
-            it[name] = "Example"
-            it[company_id] = 1
-        }
-
-        Rule.insert {
-            it[workflow_id] = 1
-            it[min_amount] = BigDecimal(10000)
-            it[related_department_id] = 2
-            it[employee_id] = 1
-        }
-        Rule.insert {
-            it[workflow_id] = 1
-            it[min_amount] = BigDecimal(10000)
-            it[employee_id] = 3
-        }
-        Rule.insert {
-            it[workflow_id] = 1
-            it[min_amount] = BigDecimal(5000)
-            it[max_amount] = BigDecimal(10000)
-            it[is_manager_approval_required] = true
-            it[employee_id] = 5
-        }
-        Rule.insert {
-            it[workflow_id] = 1
-            it[min_amount] = BigDecimal(5000)
-            it[max_amount] = BigDecimal(10000)
-            it[is_manager_approval_required] = false
-            it[employee_id] = 2
-        }
-        Rule.insert {
-            it[workflow_id] = 1
-            it[max_amount] = BigDecimal(5000)
-            it[employee_id] = 2
-        }
-
-        Invoice.insert {
-            it[amount] = BigDecimal(4000)
-            it[is_manager_approval_required] = false
-            it[related_department_id] = 1
-            it[workflow_id] = 1
-            it[company_id] = 1
-        }
-        Invoice.insert {
-            it[amount] = BigDecimal(14000)
-            it[is_manager_approval_required] = false
-            it[related_department_id] = 1
-            it[workflow_id] = 1
-            it[company_id] = 1
+        // Add data migration
+        addDataMigration()
+        try {
+            // Create invoice from terminal
+            createInvoiceFromTerminal()
+            println("Your invoice was added successfully.")
+        } catch (e: Exception) {
+            println("Error: ${e.message}")
         }
     }
 }
 
-data class EmployeeData(
-    val id: Int,
-    val name: String,
-    val isManager: Boolean,
-    val role: String,
-    val departmentId: Int
-)
-
-fun ResultRow.toEmployee(): EmployeeData {
-    return EmployeeData(
-        id = this[Employee.id],
-        name = this[Employee.name],
-        isManager = this[Employee.is_manager],
-        role = this[Employee.role],
-        departmentId = this[Employee.department_id]
-    )
+/**
+ * Create invoice from terminal by asking for user input
+ */
+fun createInvoiceFromTerminal() {
+    println("Give me amount of money for invoice (in USD): (Type in big decimal with scale 2)")
+    val amountString = readLine()
+    val amount = amountString?.toBigDecimal() ?: return
+    println("Is manager approval required for this invoice? (Type Yes or No)")
+    val approvalString = readLine()
+    var approval: Boolean
+    if (approvalString == "Yes") {
+        approval = true
+    } else if (approvalString == "No") {
+        approval = false
+    } else {return}
+    println("Give me id of company: (Type integer number)")
+    val companyIdString = readLine()
+    val companyId = companyIdString?.toInt() ?: return
+    println("Give me id of related department: (Type integer number)")
+    val relatedIdString = readLine()
+    val relatedId = relatedIdString?.toInt() ?: return
+    println("Give me id of related workflow in that company: (Type integer number)")
+    val workflowIdString = readLine()
+    val workflowId = workflowIdString?.toInt() ?: return
+    // Start transaction
+    transaction {
+        // Insert the invoice
+        Invoice.insert {
+            it[Invoice.amount] = amount
+            it[is_manager_approval_required] = approval
+            it[related_department_id] = relatedId
+            it[workflow_id] = workflowId
+            it[company_id] = companyId
+        }
+    }
 }

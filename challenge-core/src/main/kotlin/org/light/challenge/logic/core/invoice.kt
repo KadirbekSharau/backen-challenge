@@ -1,21 +1,23 @@
-package org.light.challenge.app
+package org.light.challenge.logic.core
 
-import java.math.BigDecimal
-import org.light.challenge.data.Invoice
+import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.*
-import org.light.challenge.data.Rule
+import org.light.challenge.data.Invoice
+import java.math.BigDecimal
 
-
+// Data class for holding invoice data
 data class InvoiceData(
-  val id: Int,
-  val amount: BigDecimal,
-  val isManagerApprovalRequired: Boolean,
-  val relatedDepartmentId: Int,
-  val companyId: Int,
-  val workflowId: Int
+    val id: Int,
+    val amount: BigDecimal,
+    val isManagerApprovalRequired: Boolean,
+    val relatedDepartmentId: Int,
+    val companyId: Int,
+    val workflowId: Int
 )
 
+// Extension function to convert ResultRow to InvoiceData
 fun ResultRow.toInvoice(): InvoiceData {
     return InvoiceData(
         id = this[Invoice.id],
@@ -27,7 +29,9 @@ fun ResultRow.toInvoice(): InvoiceData {
     )
 }
 
+// Validate an invoice against a set of rules
 fun validateInvoice(invoice: InvoiceData, rules: List<RuleData>): Int {
+    println("Applying rules for invoice with ID: ${invoice.id}")
     for (rule in rules) {
         if (rule.isManagerApprovalRequired != null && rule.isManagerApprovalRequired != invoice.isManagerApprovalRequired) {
             continue
@@ -46,47 +50,26 @@ fun validateInvoice(invoice: InvoiceData, rules: List<RuleData>): Int {
     return 0
 }
 
+// Function to get all invoice data
 fun getAllInvoiceData(): List<InvoiceData> {
     return transaction {
+        // Select all invoices from the database and map them to InvoiceData objects
         Invoice.selectAll().map { it.toInvoice() }.toList()
     }
 }
 
+// Function to get invoice data by workflow Id
 fun getInvoiceDataByWorkflowId(workflowId: Int): List<InvoiceData> {
     return transaction {
+        // Select invoices by workflowId from the database and map them to InvoiceData objects
         Invoice.select {Invoice.workflow_id eq workflowId}.map { it.toInvoice() }.toList()
     }
 }
 
+// Function to get a single invoice by id
 fun getInvoiceById(invoiceId: Int): InvoiceData? {
     return transaction {
+        // Select a single invoice by id from the database and map it to an InvoiceData object
         Invoice.select { Invoice.id eq invoiceId }.firstOrNull()?.toInvoice()
     }
 }
-
-// fun createInvoice(amount: BigDecimal, isManagerApprovalRequired: Boolean, relatedDepartmentId: Int, companyId: Int, workflowId: Int) {
-//     transaction {
-//         val invoice = Invoice.insert {row ->
-//             row[amount] = amount
-//             row[is_manager_approval_required] = isManagerApprovalRequired
-//             row[related_department_id] = relatedDepartmentId
-//             row[company_id] = companyId
-//             row[workflow_id] = workflowId
-//         }
-//     }
-// }
-
-// fun updateInvoiceStatus(invoiceId: Int, status: Boolean) {
-//     transaction {
-//         Invoice.update({ Invoice.id eq invoiceId }) {row ->
-//             row[status] = status
-//         }
-//     }
-// }
-
-//fun deleteInvoice(invoiceId: Int): Boolean {
-//    return transaction {
-//        val rowsAffected = Invoice.deleteWhere { Invoice.id eq invoiceId }
-//        rowsAffected > 0
-//    }
-//}

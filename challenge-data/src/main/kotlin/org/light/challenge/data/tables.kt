@@ -2,7 +2,7 @@ package org.light.challenge.data
 
 import org.jetbrains.exposed.sql.Table
 
-// TODO: placeholder - DB tables here
+// You can find visual structure of tables in README file
 object Company : Table() {
     val id = integer("id").autoIncrement().primaryKey()
     val name = varchar("name", 50)
@@ -18,8 +18,9 @@ object Employee : Table() {
     val id = integer("id").autoIncrement().primaryKey()
     val name = varchar("name", 50)
     val is_manager = bool("is_manager")
-    val role = varchar("role", 50)
-    val department_id = (integer("department_id") references Department.id) 
+    val role = varchar("role", 50).default("Member")
+    val department_id = (integer("department_id") references Department.id)
+    val approval_method = integer("approval_method") // 1: slack, 2: email
 }
 
 object Invoice : Table() {
@@ -53,6 +54,6 @@ object Approval : Table() {
     val employee_id = (integer("employee_id") references Employee.id)
     val status_approved = bool("status_approved")
     val date = date("date")
-    val approval_method = integer("approval_method")
+    val approval_method = integer("approval_method") // 1: slack, 2: email
 }
 

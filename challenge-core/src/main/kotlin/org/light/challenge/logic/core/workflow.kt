@@ -1,17 +1,25 @@
-package org.light.challenge.app
+package org.light.challenge.logic.core
 
- import org.light.challenge.data.Workflow
- import org.light.challenge.data.Rule
- import org.jetbrains.exposed.sql.transactions.transaction
- import org.jetbrains.exposed.sql.*
- import java.math.BigDecimal
+import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.light.challenge.data.Rule
+import org.light.challenge.data.Workflow
+import java.math.BigDecimal
 
+//Data class representing a workflow with id, name, and companyId properties
 data class WorkflowData(
     val id: Int,
     val name: String,
     val companyId: Int
 )
 
+/**
+ * Extension function to convert a ResultRow to a WorkflowData object
+ * @param this the ResultRow to convert
+ * @return the converted WorkflowData object
+ */
 fun ResultRow.toWorkflow(): WorkflowData {
     return WorkflowData(
         id = this[Workflow.id],
@@ -28,19 +36,19 @@ fun ResultRow.toWorkflow(): WorkflowData {
  }
 
  fun simulateWorkflowforInvoices(workflowId: Int) {
-
+     println("Getting all rules and invoices referenced to workflow:")
      val rules = getRulesDataByWorkflowId(workflowId)
-
      val invoices = getInvoiceDataByWorkflowId(workflowId)
 
      // Iterate over invoices and apply the rules
      for (invoice in invoices) {
          val employeeId = validateInvoice(invoice, rules)
-         sendRequestToSlack(invoice, employeeId)
+         sendRequest(invoice, employeeId)
      }
  }
 
  fun getAllWorkflowData(): List<WorkflowData> {
+     println("Retrieving all workflows from database.")
      return transaction {
          Workflow.selectAll().map { it.toWorkflow() }.toList() ?: throw IllegalArgumentException("Workflows are not found")
      }
