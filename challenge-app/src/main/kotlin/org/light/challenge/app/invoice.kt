@@ -4,6 +4,7 @@ import java.math.BigDecimal
 import org.light.challenge.data.Invoice
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.*
+import org.light.challenge.data.Rule
 
 
 data class InvoiceData(
@@ -24,6 +25,25 @@ fun ResultRow.toInvoice(): InvoiceData {
         companyId = this[Invoice.company_id],
         workflowId = this[Invoice.workflow_id]
     )
+}
+
+fun validateInvoice(invoice: InvoiceData, rules: List<RuleData>): Int {
+    for (rule in rules) {
+        if (rule.isManagerApprovalRequired != null && rule.isManagerApprovalRequired != invoice.isManagerApprovalRequired) {
+            continue
+        }
+        if (rule.minAmount != null && rule.minAmount > invoice.amount) {
+            continue
+        }
+        if (rule.maxAmount != null && rule.maxAmount!! < invoice.amount) {
+            continue
+        }
+        if (rule.relatedDepartmentId != null && rule.relatedDepartmentId != invoice.relatedDepartmentId) {
+            continue
+        }
+        return rule.employeeId
+    }
+    return 0
 }
 
 fun getAllInvoiceData(): List<InvoiceData> {
@@ -64,9 +84,9 @@ fun getInvoiceById(invoiceId: Int): InvoiceData? {
 //     }
 // }
 
-fun deleteInvoice(invoiceId: Int): Boolean {
-    return transaction {
-        val rowsAffected = Invoice.deleteWhere { Invoice.id eq invoiceId }
-        rowsAffected > 0
-    }
-}
+//fun deleteInvoice(invoiceId: Int): Boolean {
+//    return transaction {
+//        val rowsAffected = Invoice.deleteWhere { Invoice.id eq invoiceId }
+//        rowsAffected > 0
+//    }
+//}

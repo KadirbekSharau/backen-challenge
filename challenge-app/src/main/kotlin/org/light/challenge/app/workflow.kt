@@ -1,75 +1,82 @@
 package org.light.challenge.app
 
-// import org.light.challenge.data.Workflow
-// import org.light.challenge.data.Rule
-// import org.light.challenge.data.Invoice
-// import org.jetbrains.exposed.sql.transactions.transaction
-// import org.jetbrains.exposed.sql.*
+ import org.light.challenge.data.Workflow
+ import org.light.challenge.data.Rule
+ import org.jetbrains.exposed.sql.transactions.transaction
+ import org.jetbrains.exposed.sql.*
+ import java.math.BigDecimal
 
-// fun checkAllInvoices() {
-//     val workflows = getAllWorkflowData()
-//     for (wf in workflows) {
-//         val invoices = getInvoiceDataByWorkflowId(wf.id)
+data class WorkflowData(
+    val id: Int,
+    val name: String,
+    val companyId: Int
+)
 
-//     }    
-// }
+fun ResultRow.toWorkflow(): WorkflowData {
+    return WorkflowData(
+        id = this[Workflow.id],
+        name = this[Workflow.name],
+        companyId = this[Workflow.company_id]
+    )
+}
 
-// fun simulateWorkflowforInvoices(workflowId: Int) {
+ fun checkAllInvoices() {
+     val workflows = getAllWorkflowData()
+     for (wf in workflows) {
+         simulateWorkflowforInvoices(wf.id)
+     }
+ }
 
-//     val rules = getRulesDataByWorkflowId(workflowId)
+ fun simulateWorkflowforInvoices(workflowId: Int) {
 
-//     val invoices = getInvoiceDataByWorkflowId(workflowId)
+     val rules = getRulesDataByWorkflowId(workflowId)
 
-//     // Iterate over invoices and apply the rules
-//     for (invoice in invoices) {
-//         val employeeId = validateInvoice(invoice, rules)
-//         sendRequestToSlack()
-//     }
-// }
+     val invoices = getInvoiceDataByWorkflowId(workflowId)
 
-// fun validateInvoice(invoice: Invoice, rules: List<Rule>): Int {
-//     for (rule in rules) {
-//         if (!rule.is_manager_approval_required && rule.is_manager_approval_required != invoice.is_manager_approval_required) {
-//             continue
-//         }
-//         if (!rule.min_amount && rule.min_amount > invoice.amount) {
-//             continue
-//         }
-//         if (!rule.max_amount && rule.max_amount < invoice.amount) {
-//             continue
-//         }
-//         if (!rule.related_department_id && rule.related_department_id != invoice.related_department_id) {
-//             continue
-//         }
-//         return rule.employee_id
-//     }
-// }
+     // Iterate over invoices and apply the rules
+     for (invoice in invoices) {
+         val employeeId = validateInvoice(invoice, rules)
+         sendRequestToSlack(invoice, employeeId)
+     }
+ }
 
-// fun sendRequestToSlack(invoice: Invoice, employeeId: Int) {
-//     val empl = getEmployeeById(employeeId)
-//     println("Employee with name ${empl.name} approved it!")
-// }
+ fun getAllWorkflowData(): List<WorkflowData> {
+     return transaction {
+         Workflow.selectAll().map { it.toWorkflow() }.toList() ?: throw IllegalArgumentException("Workflows are not found")
+     }
+ }
 
-// fun sendRequestToEmail(invoice: Invoice, employeeId: Int) {
-//     val empl = getEmployeeById(employeeId)
-//     println("Employee with name ${empl.name} approved it!")
-// }
+ fun getWorkflowById(workflowId: Int): WorkflowData? {
+     return transaction {
+         Workflow.select { Workflow.id eq workflowId }
+         .singleOrNull()?.toWorkflow() ?: throw IllegalArgumentException("Workflow with id $workflowId not found")
+     }
+ }
 
-// fun getAllWorkflowData(): List<Workflow> {
-//     return transaction {
-//         Workflow.selectAll() ?: throw IllegalArgumentException("Workflows are not found")
-//     }
-// }
+data class RuleData(
+    val id: Int,
+    val minAmount: BigDecimal?,
+    val maxAmount: BigDecimal?,
+    val isManagerApprovalRequired: Boolean?,
+    val relatedDepartmentId: Int?,
+    val employeeId: Int,
+    val workFlowId: Int
+)
 
-// fun getWorkflowById(workflowId: Int): Workflow? {
-//     return transaction {
-//         Workflow.select { Workflow.id eq workflowId }
-//         .singleOrNull() ?: throw IllegalArgumentException("Workflow with id $workflowId not found")
-//     }
-// }
+fun ResultRow.toRule(): RuleData {
+    return RuleData(
+        id = this[Rule.id],
+        minAmount = this[Rule.min_amount],
+        maxAmount = this[Rule.max_amount],
+        isManagerApprovalRequired = this[Rule.is_manager_approval_required],
+        relatedDepartmentId = this[Rule.related_department_id],
+        employeeId = this[Rule.employee_id],
+        workFlowId = this[Rule.workflow_id]
+    )
+}
 
-// fun getRulesDataByWorkflowId(workflowId: Int): List<Rule> {
-//     return transaction {
-//         Rule.select { Rule.workflow_id eq workflowId }
-//     }
-// }
+ fun getRulesDataByWorkflowId(workflowId: Int): List<RuleData> {
+     return transaction {
+         Rule.select { Rule.workflow_id eq workflowId }.map { it.toRule() }.toList()
+     }
+ }
